@@ -353,6 +353,54 @@
       color: var(--primary);
     }
 
+    /* Teams & players reference on standings step */
+    .teams-reference {
+      margin-top: 1.5rem;
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 1rem;
+    }
+
+    .teams-reference h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+    }
+
+    .teams-reference details {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .teams-reference summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .teams-reference summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .teams-reference ul {
+      list-style: none;
+      margin-top: 0.5rem;
+      padding-left: 0.25rem;
+    }
+
+    .teams-reference li {
+      font-size: 0.9rem;
+      color: var(--text);
+      padding: 0.15rem 0;
+    }
+
     /* Export section */
     .export-section {
       margin-top: 2rem;
@@ -438,8 +486,12 @@
       </thead>
       <tbody id="standings-body"></tbody>
     </table>
+    <div class="teams-reference" id="teams-reference">
+      <!-- Filled in by renderTeamsReference() -->
+    </div>
     <div class="export-section">
-      <button class="btn btn-secondary" onclick="exportToCSV()">📥 Export to CSV</button>
+      <button class="btn btn-outline" onclick="goToStep(3)">← Back</button>
+      <button class="btn btn-secondary" onclick="exportToCSV()" style="margin-left: 1rem;">📥 Export to CSV</button>
       <button class="btn btn-outline" onclick="resetTournament()" style="margin-left: 1rem;">🔄 Start New Tournament</button>
     </div>
   </div>
@@ -860,6 +912,47 @@
           <td>${standing.diff >= 0 ? '+' : ''}${standing.diff}</td>
         `;
         tbody.appendChild(row);
+      });
+
+      // Also update the teams & players reference panel
+      renderTeamsReference();
+    }
+
+    /**
+     * Render an expandable list of teams and their players
+     * as a reference on the standings step.
+     */
+    function renderTeamsReference() {
+      const container = document.getElementById('teams-reference');
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      // Create a details section for each team
+      teams.forEach((team, idx) => {
+        const details = document.createElement('details');
+        details.className = 'team-ref';
+        if (idx === 0) details.open = true; // open the first team by default
+
+        const playersList = (team.players || []).map(p => `<li>${p}</li>`).join('');
+        const playersCount = (team.players || []).length;
+
+        details.innerHTML = `
+          <summary>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span class="team-color-dot" style="background: ${team.color || getDefaultTeamColor(idx)}"></span>
+              <strong>${getTeamName(idx)}</strong>
+            </div>
+            <span style="color: var(--muted); font-size: 0.85rem;">
+              ${playersCount} player${playersCount === 1 ? '' : 's'}
+            </span>
+          </summary>
+          <ul>
+            ${playersList || '<li style="color: var(--muted);">No players listed.</li>'}
+          </ul>
+        `;
+
+        container.appendChild(details);
       });
     }
 
