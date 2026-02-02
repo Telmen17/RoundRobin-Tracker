@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volleyball Round Robin Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --primary: #00d4aa;
+      --secondary: #ff6b6b;
+      --text: #e8eaed;
+      --muted: #8b949e;
+      --border: rgba(148, 163, 184, 0.3);
+      --radius: 12px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      padding: clamp(1rem, 3vw, 2rem);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+
+    /* Step indicator */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .step.active {
+      background: var(--primary);
+      color: #02110d;
+      border-color: var(--primary);
+    }
+
+    .step.completed {
+      background: rgba(0, 212, 170, 0.2);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Main content panels */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel h2 {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    /* Form inputs */
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .input-group input,
+    .input-group textarea,
+    .input-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus,
+    .input-group select:focus {
+      border-color: var(--primary);
+    }
+
+    .input-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* Better visibility and sizing for color pickers */
+    .input-group input[type="color"] {
+      padding: 0;
+      width: 3rem;
+      height: 2rem;
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .input-group small {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #02110d;
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    /* Teams display */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .team-card {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .team-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--primary);
+    }
+
+    .team-card ul {
+      list-style: none;
+    }
+
+    .team-card li {
+      padding: 0.25rem 0;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .team-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    /* Matches list */
+    .matches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .match-card {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .match-card.completed {
+      opacity: 0.7;
+    }
+
+    .team-name {
+      font-weight: 600;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .score-inputs {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .score-inputs input {
+      width: 60px;
+      padding: 0.5rem;
+      text-align: center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .score-inputs span {
+      color: var(--muted);
+    }
+
+    /* Standings table */
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: #020617;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .standings-table th,
+    .standings-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .standings-table th {
+      background: var(--surface);
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .standings-table td {
+      color: var(--text);
+    }
+
+    .standings-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .standings-table .rank {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Export section */
+    .export-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Round Robin Tracker</h1>
+  <p>Define teams → Generate schedule → Track matches → View standings</p>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step active" data-step="1">1. Teams</div>
+    <div class="step" data-step="2">2. Schedule</div>
+    <div class="step" data-step="3">3. Results</div>
+    <div class="step" data-step="4">4. Standings</div>
+  </div>
+
+  <!-- Step 1: Define Teams & Players -->
+  <div class="panel active" id="panel-teams">
+    <h2>Define Teams & Players</h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">
+      Set up each team with an optional name, color, and player list.
+    </p>
+    <div class="input-group">
+      <label for="num-teams">Number of Teams</label>
+      <input type="number" id="num-teams" min="2" max="12" value="4" onchange="renderTeamsEditor()">
+      <small>Teams with no players will be ignored when generating the schedule</small>
+    </div>
+    <div id="teams-editor" class="teams-grid"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="generateSchedule()">Generate Schedule →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Round Robin Schedule -->
+  <div class="panel" id="panel-schedule">
+    <h2>Match Schedule</h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">All teams will play each other once</p>
+    <div id="matches-container"></div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(3)">Start Recording Results →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Record Results -->
+  <div class="panel" id="panel-results">
+    <h2>Record Match Results</h2>
+    <p style="color: var(--muted); margin-bottom: 1rem;">Enter scores for each match</p>
+    <div id="results-container"></div>
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="goToStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(4)">View Standings →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Standings -->
+  <div class="panel" id="panel-standings">
+    <h2>Tournament Standings</h2>
+    <table class="standings-table" id="standings-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Team</th>
+          <th>Played</th>
+          <th>Wins</th>
+          <th>Losses</th>
+          <th>Points For</th>
+          <th>Points Against</th>
+          <th>+/-</th>
+        </tr>
+      </thead>
+      <tbody id="standings-body"></tbody>
+    </table>
+    <div class="export-section">
+      <button class="btn btn-secondary" onclick="exportToCSV()">📥 Export to CSV</button>
+      <button class="btn btn-outline" onclick="resetTournament()" style="margin-left: 1rem;">🔄 Start New Tournament</button>
+    </div>
+  </div>
+
+  <script>
+    // --- State management ---
+    let players = [];
+    let teams = [];
+    let matches = [];
+    let currentStep = 1;
+
+    const STORAGE_KEY = 'roundrobin-tournament';
+
+    /**
+     * Helper: get a default color for a team index.
+     */
+    function getDefaultTeamColor(index) {
+      const palette = [
+        '#00d4aa',
+        '#ff6b6b',
+        '#4f46e5',
+        '#facc15',
+        '#22c55e',
+        '#ec4899',
+        '#0ea5e9',
+        '#a855f7',
+        '#f97316',
+        '#e11d48',
+        '#14b8a6',
+        '#6366f1'
+      ];
+      return palette[index % palette.length];
+    }
+
+    /**
+     * Helper: get display name for a team index.
+     */
+    function getTeamName(index) {
+      const team = teams[index];
+      if (!team) return `Team ${index + 1}`;
+      return team.name && team.name.trim().length > 0 ? team.name.trim() : `Team ${index + 1}`;
+    }
+
+    /**
+     * Load tournament state from localStorage if it exists.
+     */
+    function loadTournament() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          players = data.players || [];
+
+          // Backwards compatibility: old format stored teams as arrays of player names
+          if (Array.isArray(data.teams) && data.teams.length > 0) {
+            if (!data.teams[0] || Array.isArray(data.teams[0])) {
+              teams = data.teams.map((playerList, idx) => ({
+                name: `Team ${idx + 1}`,
+                color: getDefaultTeamColor(idx),
+                players: Array.isArray(playerList) ? playerList : []
+              }));
+            } else {
+              teams = data.teams;
+            }
+          } else {
+            teams = [];
+          }
+          matches = data.matches || [];
+          currentStep = Math.min(data.currentStep || 1, 4);
+
+          // Restore UI
+          document.getElementById('num-teams').value = teams.length || 4;
+          goToStep(currentStep);
+        }
+      } catch (_) {
+        // Ignore errors
+      }
+    }
+
+    /**
+     * Save tournament state to localStorage.
+     */
+    function saveTournament() {
+      try {
+        // Keep a flat list of players for convenience/compatibility
+        const allPlayers = teams.flatMap(t => (t.players || []));
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({
+            players: allPlayers,
+            teams,
+            matches,
+            currentStep
+          })
+        );
+      } catch (_) {
+        // Ignore storage errors
+      }
+    }
+
+    /**
+     * Navigate to a specific step and update UI.
+     */
+    function goToStep(step) {
+      currentStep = step;
+
+      // Update step indicators
+      document.querySelectorAll('.step').forEach((el, idx) => {
+        const stepNum = idx + 1;
+        el.classList.remove('active', 'completed');
+        if (stepNum === step) {
+          el.classList.add('active');
+        } else if (stepNum < step) {
+          el.classList.add('completed');
+        }
+      });
+
+      // Show/hide panels
+      document.querySelectorAll('.panel').forEach((panel, idx) => {
+        panel.classList.toggle('active', idx + 1 === step);
+      });
+
+      // Render step-specific content
+      if (step === 1) renderTeamsEditor();
+      else if (step === 2) renderSchedule();
+      else if (step === 3) renderResults();
+      else if (step === 4) renderStandings();
+
+      saveTournament();
+    }
+
+    /**
+     * Step 1: Render team editor.
+     */
+    function renderTeamsEditor() {
+      const numTeamsInput = document.getElementById('num-teams');
+      let numTeams = parseInt(numTeamsInput.value, 10) || 2;
+      if (numTeams < 2) numTeams = 2;
+      if (numTeams > 12) numTeams = 12;
+      numTeamsInput.value = numTeams;
+
+      // Ensure teams array has the right length
+      while (teams.length < numTeams) {
+        const idx = teams.length;
+        teams.push({
+          name: `Team ${idx + 1}`,
+          color: getDefaultTeamColor(idx),
+          players: []
+        });
+      }
+      if (teams.length > numTeams) {
+        teams = teams.slice(0, numTeams);
+      }
+
+      const container = document.getElementById('teams-editor');
+      if (!container) return;
+      container.innerHTML = '';
+
+      teams.forEach((team, idx) => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.innerHTML = `
+          <div class="team-header">
+            <h3>${getTeamName(idx)}</h3>
+            <span class="team-color-dot" style="background: ${team.color || getDefaultTeamColor(idx)}"></span>
+          </div>
+          <div class="input-group">
+            <label>Team Name</label>
+            <input type="text" value="${team.name || ''}" oninput="updateTeamName(${idx}, this.value)">
+          </div>
+          <div class="input-group">
+            <label>Team Color</label>
+            <input type="color" value="${team.color || getDefaultTeamColor(idx)}"
+                   oninput="updateTeamColor(${idx}, this.value)"
+                   onchange="updateTeamColor(${idx}, this.value)">
+          </div>
+          <div class="input-group">
+            <label>Players (one per line)</label>
+            <textarea oninput="updateTeamPlayers(${idx}, this.value)">${(team.players || []).join('\n')}</textarea>
+            <small>Only teams with at least one player will be scheduled.</small>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      container.className = 'teams-grid';
+      saveTournament();
+    }
+
+    function updateTeamName(index, value) {
+      if (!teams[index]) return;
+      teams[index].name = value;
+      // Update the visible header text for this team without re-rendering the whole editor
+      // Find the teams editor container in the DOM
+      const container = document.getElementById('teams-editor');
+      if (container) {
+        // Each team is rendered as a `.team-card`; use the same index to grab the right one
+        const cards = container.getElementsByClassName('team-card');
+        const card = cards[index];
+        if (card) {
+          // Inside that card, update just the header text so the visible name matches the new value
+          const header = card.querySelector('.team-header h3');
+          if (header) header.textContent = getTeamName(index);
+        }
+      }
+      saveTournament();
+    }
+
+    function updateTeamColor(index, value) {
+      if (!teams[index]) return;
+      teams[index].color = value;
+      // Live-update the color dot and keep the input in sync without re-rendering
+      const container = document.getElementById('teams-editor');
+      if (container) {
+        // Grab all rendered team cards; they are ordered the same as the teams array
+        const cards = container.getElementsByClassName('team-card');
+        const card = cards[index];
+        if (card) {
+          // Update the small color dot in the card header so it reflects the new color immediately
+          const dot = card.querySelector('.team-header .team-color-dot');
+          if (dot) dot.style.background = value;
+          // Also ensure the underlying <input type="color"> shows the same value,
+          // in case the change was triggered programmatically
+          const colorInput = card.querySelector('input[type="color"]');
+          if (colorInput && colorInput.value !== value) {
+            colorInput.value = value;
+          }
+        }
+      }
+      saveTournament();
+    }
+
+    function updateTeamPlayers(index, value) {
+      if (!teams[index]) return;
+      teams[index].players = value
+        .split('\n')
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+      saveTournament();
+    }
+
+    /**
+     * Step 2: Generate round robin schedule.
+     */
+    function generateSchedule() {
+      matches = [];
+      // Filter out teams with no players
+      teams = teams.filter(team => (team.players || []).length > 0);
+
+      if (teams.length < 2) {
+        alert('You need at least two teams with players to create a schedule.');
+        return;
+      }
+
+      // Generate all possible matchups (each team plays every other team once)
+      for (let i = 0; i < teams.length; i++) {
+        for (let j = i + 1; j < teams.length; j++) {
+          matches.push({
+            teamA: i,
+            teamB: j,
+            scoreA: null,
+            scoreB: null,
+            completed: false
+          });
+        }
+      }
+
+      goToStep(2);
+    }
+
+    /**
+     * Step 2: Render schedule.
+     */
+    function renderSchedule() {
+      const container = document.getElementById('matches-container');
+      container.innerHTML = '';
+
+      matches.forEach((match, idx) => {
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.innerHTML = `
+          <div class="team-name">
+            <span class="team-color-dot" style="background: ${teams[match.teamA]?.color || getDefaultTeamColor(match.teamA)}"></span>
+            ${getTeamName(match.teamA)}
+          </div>
+          <div style="color: var(--muted);">vs</div>
+          <div class="team-name">
+            <span class="team-color-dot" style="background: ${teams[match.teamB]?.color || getDefaultTeamColor(match.teamB)}"></span>
+            ${getTeamName(match.teamB)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      container.className = 'matches-list';
+    }
+
+    /**
+     * Step 3: Render results input.
+     */
+    function renderResults() {
+      const container = document.getElementById('results-container');
+      container.innerHTML = '';
+
+      matches.forEach((match, idx) => {
+        const card = document.createElement('div');
+        card.className = `match-card ${match.completed ? 'completed' : ''}`;
+        card.innerHTML = `
+          <div class="team-name">
+            <span class="team-color-dot" style="background: ${teams[match.teamA]?.color || getDefaultTeamColor(match.teamA)}"></span>
+            ${getTeamName(match.teamA)}
+          </div>
+          <div class="score-inputs">
+            <input type="number" min="0" value="${match.scoreA ?? ''}" 
+                   onchange="updateMatch(${idx}, 'A', this.value)" 
+                   placeholder="0">
+            <span>:</span>
+            <input type="number" min="0" value="${match.scoreB ?? ''}" 
+                   onchange="updateMatch(${idx}, 'B', this.value)" 
+                   placeholder="0">
+          </div>
+          <div class="team-name">
+            <span class="team-color-dot" style="background: ${teams[match.teamB]?.color || getDefaultTeamColor(match.teamB)}"></span>
+            ${getTeamName(match.teamB)}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      container.className = 'matches-list';
+    }
+
+    /**
+     * Update a match result.
+     */
+    function updateMatch(matchIdx, side, value) {
+      const match = matches[matchIdx];
+      if (side === 'A') {
+        match.scoreA = parseInt(value) || 0;
+      } else {
+        match.scoreB = parseInt(value) || 0;
+      }
+
+      // Mark as completed if both scores are entered
+      match.completed = match.scoreA !== null && match.scoreB !== null;
+
+      saveTournament();
+    }
+
+    /**
+     * Step 5: Calculate and render standings.
+     */
+    function renderStandings() {
+      // Calculate stats for each team
+      const stats = teams.map(() => ({
+        played: 0,
+        wins: 0,
+        losses: 0,
+        pointsFor: 0,
+        pointsAgainst: 0
+      }));
+
+      matches.forEach(match => {
+        if (!match.completed) return;
+
+        const scoreA = match.scoreA || 0;
+        const scoreB = match.scoreB || 0;
+
+        stats[match.teamA].played++;
+        stats[match.teamA].pointsFor += scoreA;
+        stats[match.teamA].pointsAgainst += scoreB;
+
+        stats[match.teamB].played++;
+        stats[match.teamB].pointsFor += scoreB;
+        stats[match.teamB].pointsAgainst += scoreA;
+
+        if (scoreA > scoreB) {
+          stats[match.teamA].wins++;
+          stats[match.teamB].losses++;
+        } else if (scoreB > scoreA) {
+          stats[match.teamB].wins++;
+          stats[match.teamA].losses++;
+        }
+      });
+
+      // Create standings array with team info
+      const standings = stats.map((stat, idx) => ({
+        index: idx,
+        name: getTeamName(idx),
+        color: teams[idx]?.color || getDefaultTeamColor(idx),
+        ...stat,
+        diff: stat.pointsFor - stat.pointsAgainst
+      }));
+
+      // Sort by wins (desc), then by point difference (desc)
+      standings.sort((a, b) => {
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        return b.diff - a.diff;
+      });
+
+      // Render table
+      const tbody = document.getElementById('standings-body');
+      tbody.innerHTML = '';
+
+      standings.forEach((standing, idx) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="rank">${idx + 1}</td>
+          <td>
+            <span class="team-color-dot" style="background: ${standing.color}"></span>
+            <strong style="margin-left: 0.4rem;">${standing.name}</strong>
+          </td>
+          <td>${standing.played}</td>
+          <td>${standing.wins}</td>
+          <td>${standing.losses}</td>
+          <td>${standing.pointsFor}</td>
+          <td>${standing.pointsAgainst}</td>
+          <td>${standing.diff >= 0 ? '+' : ''}${standing.diff}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    /**
+     * Export tournament data to CSV.
+     */
+    function exportToCSV() {
+      // Standings CSV
+      const standingsRows = ['Rank,Team,Played,Wins,Losses,Points For,Points Against,Difference'];
+      
+      const tbody = document.getElementById('standings-body');
+      Array.from(tbody.rows).forEach(row => {
+        const cells = Array.from(row.cells).map(c => c.textContent.trim());
+        standingsRows.push(cells.join(','));
+      });
+
+      const standingsCSV = standingsRows.join('\n');
+
+      // Matches CSV
+      const matchRows = ['Match,Team A,Team B,Score A,Score B'];
+      matches.forEach((match, idx) => {
+        const teamAName = getTeamName(match.teamA);
+        const teamBName = getTeamName(match.teamB);
+        matchRows.push(
+          `${idx + 1},${teamAName},${teamBName},${match.scoreA ?? ''},${match.scoreB ?? ''}`
+        );
+      });
+
+      const matchesCSV = matchRows.join('\n');
+
+      // Download both files
+      downloadCSV('standings.csv', standingsCSV);
+      downloadCSV('matches.csv', matchesCSV);
+    }
+
+    /**
+     * Trigger CSV download.
+     */
+    function downloadCSV(filename, content) {
+      const blob = new Blob([content], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Reset tournament and start fresh.
+     */
+    function resetTournament() {
+      if (confirm('Are you sure you want to start a new tournament? All current data will be lost.')) {
+        players = [];
+        teams = [];
+        matches = [];
+        localStorage.removeItem(STORAGE_KEY);
+        document.getElementById('num-teams').value = 4;
+        goToStep(1);
+      }
+    }
+
+    // Initialize on page load
+    loadTournament();
+    if (teams.length === 0) {
+      goToStep(1);
+    }
+  </script>
+</body>
+</html>
