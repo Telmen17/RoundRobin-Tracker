@@ -1,0 +1,49 @@
+<!-- Paste this into a WordPress Custom HTML block. No iframe – button lives in the page. -->
+<!-- Replace YOUR_TRACKER_URL with your full tracker URL, e.g. https://yoursite.com/index.html -->
+<!-- Scoped styles with !important override WordPress/theme CSS. -->
+
+<style>
+  .rr-tracker-embed {
+    margin: 2.5rem 2rem 1.5rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+  .rr-tracker-embed__btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    background: #00d4aa !important;
+    background-color: #00d4aa !important;
+    color: #02110d !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: transform 0.25s ease !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  .rr-tracker-embed__btn:hover {
+    transform: translateY(-4px) scale(1.06) !important;
+    color: #02110d !important;
+    background: #00d4aa !important;
+    background-color: #00d4aa !important;
+    text-decoration: none !important;
+    border: none !important;
+  }
+  .rr-tracker-embed__btn:active {
+    transform: translateY(-2px) scale(1.02) !important;
+  }
+</style>
+
+<div class="rr-tracker-embed">
+  <a href="http://roundrobin.gamestatlab.com/" target="_top" class="rr-tracker-embed__btn">Open Tracker</a>
+</div>
