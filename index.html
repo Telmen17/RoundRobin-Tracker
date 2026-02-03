@@ -376,6 +376,14 @@
       padding: 0.5rem 0.75rem;
     }
 
+    /* Alternate team blocks: same shade, different opacity for row differentiation */
+    .teams-reference details:nth-of-type(odd) {
+      background: rgba(15, 23, 42, 0.95);
+    }
+    .teams-reference details:nth-of-type(even) {
+      background: rgba(15, 23, 42, 0.7);
+    }
+
     .teams-reference summary {
       cursor: pointer;
       list-style: none;
@@ -398,7 +406,17 @@
     .teams-reference li {
       font-size: 0.9rem;
       color: var(--text);
-      padding: 0.15rem 0;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.15rem;
+    }
+
+    /* Alternate player rows: same primary shade at different opacity for readability */
+    .teams-reference li:nth-child(odd) {
+      background: rgba(0, 212, 170, 0.08);
+    }
+    .teams-reference li:nth-child(even) {
+      background: rgba(0, 212, 170, 0.03);
     }
 
     /* Export section */
@@ -412,6 +430,48 @@
     /* Hidden */
     .hidden {
       display: none !important;
+    }
+
+    /* Footer branding */
+    .app-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .app-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .app-footer a:hover {
+      color: var(--primary);
+    }
+
+    .app-footer__back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .app-footer__back:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: rgba(0, 212, 170, 0.08);
     }
   </style>
 </head>
@@ -1021,5 +1081,10 @@
       goToStep(1);
     }
   </script>
+
+  <footer class="app-footer" role="contentinfo">
+    <a href="https://gamestatlab.com/2026/02/02/round-robin-match-tracker/" class="app-footer__back" target="_top" rel="noopener noreferrer">← Back to blog</a>
+    <p style="margin-top: 0.5rem;">Made by <a href="https://gamestatlab.com" target="_blank" rel="noopener noreferrer">gamestatlab.com</a></p>
+  </footer>
 </body>
 </html>
